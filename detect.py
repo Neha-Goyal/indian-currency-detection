@@ -9,6 +9,7 @@ from os.path import isfile,join,isdir
 import os
 import time
 import shutil
+import sys
 
 caliberate_path=os.getcwd()+'/caliberate'
 output_path= os.getcwd()+ '/output'
@@ -75,7 +76,7 @@ print(compare_value)
 
 margin = (10000,10000,10000)
 ls_conflicts=[0,0,0,0]
-ls_diff=[(0,0,0),(0,0,0),(0,0,0),(0,0,0)]
+ls_diff=[[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
 
 while (not[i for i in ls_conflicts if i==1]):
 	capture_input_image()
@@ -83,11 +84,43 @@ while (not[i for i in ls_conflicts if i==1]):
 	for i in range(4):
 		if tuple(np.subtract(compare_value[i],margin))<output_value<tuple(np.add(compare_value[i],margin)):
 		        ls_conflicts[i] +=1
-
+		        ls_diff[i]=map(abs,list(np.subtract(compare_value[i],output_value)))
 	print("output values:")
 	print(output_value)        
-	print(ls_conflicts)	        
-
+	print(ls_conflicts)
+c=0
+for i in ls_conflicts:
+    if i>0:
+        c+=1
+if c>1:
+    r_min=sys.maxint
+    r_index=-1
+    g_min=sys.maxint
+    g_index=-1
+    b_min=sys.maxint
+    b_index=-1
+    max_c=[0,0,0,0]
+    for i in range(len(ls_diff)):
+        if ls_conflicts[i]==1:
+            #ls_diff[i]=map(abs,ls_diff[i])
+            if ls_diff[i][0]<r_min:
+                r_min=ls_diff[i][0]
+                r_index=i
+            if ls_diff[i][1]<g_min:
+                g_min=ls_diff[i][1]
+                g_index=i
+            if ls_diff[i][2]<b_min:
+                b_min=ls_diff[i][2]
+                b_index=i
+    max_c[r_index]+=1
+    max_c[g_index]+=1
+    max_c[b_index]+=1    
+    for i in range(len(max_c)):
+        if max_c[i]>1:
+            for j in range(4):
+                if i!=j:
+                    ls_conflicts[j]=0
+    
 if ls_conflicts[0]==1:
     print("10 rupees")
 if ls_conflicts[1]==1:
