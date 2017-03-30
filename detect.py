@@ -24,7 +24,7 @@ def chk_file():
             ls=[]
             with open(cal_file, "r") as f:
                 ls=[tuple(map(int,i.strip().split(' '))) for i in f]
-            if(len(ls)==4):
+            if(len(ls)==5):
                 return ls
             else:
                 raise MyException("Please run Caliberate.py|file incompelete")
@@ -65,7 +65,7 @@ def capture_input_image():
     time.sleep(1)
     print("taking sample")
     time.sleep(1)
-    cam =cv2.VideoCapture(sys.argv[0]) #####video capture######
+    cam =cv2.VideoCapture(1) #####video capture######
     s,im=cam.read()
     cv2.imwrite(os.path.join(output_path,'output.jpg'), im)
     cam.release()
@@ -81,10 +81,11 @@ ls_diff=[[0,0,0],[0,0,0],[0,0,0],[0,0,0]]
 while (not[i for i in ls_conflicts if i==1]):
 	capture_input_image()
 	output_value = read_output_fold()
-	for i in range(4):
+	output_value = tuple(np.subtract(output_value,compare_value[0]))
+	for i in range(1,5):
 		if tuple(np.subtract(compare_value[i],margin))<output_value<tuple(np.add(compare_value[i],margin)):
-		        ls_conflicts[i] +=1
-		        ls_diff[i]=map(abs,list(np.subtract(compare_value[i],output_value)))
+		        ls_conflicts[i-1] +=1
+		        ls_diff[i-1]=map(abs,list(np.subtract(compare_value[i],output_value)))
 	print("output values:")
 	print(output_value)        
 	print(ls_conflicts)

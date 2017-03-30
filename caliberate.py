@@ -8,12 +8,13 @@ import shutil
 from PIL import Image
 from os import listdir
 from os.path import isfile,join,isdir
+import numpy as np
 
 caliberate_path=os.getcwd()+'/caliberate'
 def read_fold():
     files=[f for f in listdir(caliberate_path)]
     ls=[]
-    for x in range(4):
+    for x in range(5):
         ls.append(caliberate_path+'/'+files[x])
         ls[x]=Image.open(ls[x])
         ls[x]=ls[x].resize((50,50))
@@ -35,13 +36,14 @@ def compute_avg_image_color(img):
 
     return(r_total,g_total,b_total)
 
-
 def capture_images():
     if (isdir(caliberate_path)):
         shutil.rmtree(caliberate_path)
     os.mkdir(caliberate_path)
     os.chdir(caliberate_path)
-    time.sleep(1)     
+    time.sleep(1)
+    a=raw_input("Hit ENTER key for error")
+    cam_activate(0)
     a=raw_input("Hit ENTER key for Rs 10")
     cam_activate(10)
     a=raw_input("Hit ENTER key for Rs 100")
@@ -52,13 +54,16 @@ def capture_images():
     cam_activate(2000)
 
 def cam_activate(x):
-    cam =cv2.VideoCapture(sys.argv[0])
+    cam =cv2.VideoCapture(1)
     s,im = cam.read()
     cv2.imwrite('cal%d.jpg'%x, im)
     cam.release()
 
 capture_images()
 a=read_fold()
+
+for i in range(1,len(a)):
+    a[i]=tuple(np.subtract(a[i],a[0]))
 
 with open(caliberate_path+'/cal_values.txt','w') as fp:
     for line in a:
